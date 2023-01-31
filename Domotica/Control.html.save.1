@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+.grupo_ip Button {
+    border: 1px solid gray;
+    display: inline-block;
+}
+
+.grupo_btn Button {
+    border: 1px solid gray;
+    margin-top: 10px;
+    /*margin-left: 30px;*/
+    /*margin-right: 5px; */
+    /*margin-bottom: 10px;*/
+    /*display: block;*/
+    /*float: left;*/
+}
+
+.grupo_btn Button:not(:last-child) {
+    border-bottom: none; /* Prevent double borders */
+}
+
+/* Add a background color on hover */
+.grupo_btn  button:hover {
+    background-color: #51C5F5;
+}
+
+input[type=text], select {
+    width: 30%;
+    padding: 12px 20px;
+    margin: 10px 30px;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.center{
+	margin: 0 auto;
+	text-align: center;
+}
+</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Control Autom&aacute;tico</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+</head>
+<body>
+<script type="text/javascript">
+var bgcolor;
+    $(document).ready(function(){
+	check_status_btn_wifi();
+	$.getJSON('enable.json',function(data){
+	// console.log(data);
+	$.each(data, function(key,val){
+	if(val.enable === "true"){
+	// console.log(val.pin);
+	$.ajax({
+                method: 'POST',
+                url: 'btn_status.php',
+                data: {'pin':val.pin},
+                success: function(output)
+		 {
+			if(output==1)
+				{
+				// console.log(output);
+				$("#" + val.nombre).css('background-color',"lightblue");
+				}
+			else{
+				$("#" + val.nombre).css('background-color',"none");
+			}
+		}
+        });
+	};
+	});
+	});
+	$('input[type=radio][name=conexion]').change(function(){
+	if(this.value == 'set_wired'){
+	$(switches_wired).show();
+	$(wifi_address).hide();
+	$(switches_wireless).hide();
+	}
+	else if(this.value == 'set_wireless'){
+	$(switches_wired).hide();
+	$(wifi_address).show();
+	$(switches_wireless).show();
+	}
+	});
+	$.getJSON('ip.json', function(data) {
+	$.each(data, function(key,val){
+	//console.log(val.nombre);
+	if((val.nombre!="dummy")&&(val.direccion_ip!="dummy")){
+	var btn = $('<button>' + val.nombre + '</button>').attr('id', val.nombre).addClass("ui-button ui-widget ui-corner-all wifi_btn").attr("value",val.direccion_ip);
+	(btn).appendTo(switches_wireless);
+	$('#Direccion_IP').append( '<option>'+val.direccion_ip+'</option>' );
+	//console.log(val.direccion_ip);
+	}
+	});
+	});
+        $(document).on('click', '.wifi_btn', function(){
+        var btn_id = $(this).attr('id');
+	var http = 'http://' + $(this).val();
+	//console.log(http);
+		$.ajax({
+		type: 'POST',
+                url: 'stat_wireless.php',
+		data: {'direccion_ip':http},
+                success: function(output)
+                 {
+                 console.log(output);
+		
+		if(output === "on"){
+			console.log("off");
+			$.get(http,'/off');
+			$('#' + btn_id).css('background-color',"#FFFFFF");
+		} 
+		else{
+			console.log("on");
+			$.get(http,'/on');
+			$('#' + btn_id).css('background-color',"lightblue");
+		}
+		
+		}
+		});
+	});
+
+	$('select').on('change',function(){
+		console.log(this.value);
+		var delete_ip=this.value;
+		confirm("¿desea borrar esta IP?");
+		if(confirm){
+			console.log(delete_ip);
+		}
+	});
+
+
+
+
+	$("#Ventana").click(function(){
+	 $.ajax({
+                url: 'led_ventana.php',
+		data:{'status_php':status},
+		success: function(output) {
+		$("#Ventana").css('background-color',output);		
+		
+		}
+	});
+	});
+        $("#Barra").click(function(){
+         $.ajax({
+                url: 'led_barra.php',
+                data:{'status_php':status},
+                success: function(output) {
+                $("#Barra").css('background-color',output);
+
+                }
+        });
+        });
+        $("#Mesada").click(function(){
+         $.ajax({
+                url: 'led_mesada.php',
+                data:{'status_php':status},
+                success: function(output) {
+                $("#Mesada").css('background-color',output);
+
+                }
+        });
+        });
+        $("#Habitacion_Ventana").click(function(){
+         $.ajax({
+                url: 'led_habitacion_ventana.php',
+                data:{'status_php':status},
+                success: function(output) {
+                $("#Habitacion_Ventana").css('background-color',output);
+
+                }
+        });
+        });
+        $("#Habitacion").click(function(){
+         $.ajax({
+                url: 'led_habitacion.php',
+                data:{'status_php':status},
+                success: function(output) {
+                $("#Habitacion").css('background-color',output);
+
+                }
+        });
+        });
+        $("#Riego1").click(function(){
+         $.ajax({
+                url: 'riego1.php',
+                data:{'status_php':status},
+                success: function(output) {
+                $("#Riego1").css('background-color',output);
+
+                }
+        });
+        });
+        $("#Riego2").click(function(){
+         $.ajax({
+                url: 'riego2.php',
+                data:{'status_php':status},
+                success: function(output) {
+                $("#Riego2").css('background-color',output);
+
+                }
+        });
+        });
+        $("#LuzExterior").click(function(){
+         $.ajax({
+                url: 'luzexterior.php',
+                data:{'status_php':status},
+                success: function(output) {
+                $("#LuzExterior").css('background-color',output);
+
+                }
+        });
+        });
+        $("#Bomba").click(function(){
+         $.ajax({
+                url: 'bomba.php',
+                data:{'status_php':status},
+                success: function(output) {
+                $("#Bomba").css('background-color',output);
+
+                }
+        });
+        });        
+});
+</script>
+<script>
+function check_status_btn_wifi(){
+	$.getJSON('ip.json', function(data) {
+        $.each(data, function(key,val){
+	if((val.nombre!="dummy")&&(val.direccion_ip!="dummy")){ 
+		var http = 'http://' + val.direccion_ip;
+		//console.log(http);
+		$.ajax({
+                type: "POST",
+                url: 'stat_wireless.php',
+		data: {'direccion_ip':http},
+                success: function(output)
+                 	{
+				//console.log(output);
+				if(output === 'on'){
+				$('#'+val.nombre).css('background-color',"lightblue");
+				}
+				else{
+				$('#'+val.nombre).css('background-color',"#FFFFFF");
+				}
+			}
+		});
+	}
+	});
+
+});
+}
+
+function AddIP(){
+	var var1 = prompt("Nombre dispositivo", "led_cocina");
+	var var2 = prompt("Direccion ip dispositivo", "192.168.0.x");
+	console.log(var1,var2);
+	
+	if((var1 != null)&&(var2 != null)){
+	$.ajax({
+		method: 'POST',
+                url: 'ip.php',
+                data: {"nombre":var1, "direccion":var2},
+                success: function(output) {console.log(output);}
+        });
+		}	
+	}
+</script>
+
+<h1>Control Autom&aacute;tico</h1>
+
+<div id="radio_btn" class="center">
+<label for="wired">Wire </label><input type="radio" name="conexion" id="wired" value="set_wired" checked="checked" ><label for="wireless">Wireless</label><input type="radio" name="conexion" id="wireless" value="set_wireless">
+</div>
+
+<div id= wifi_address class="grupo_ip" style="display:none";>
+<button type="Button" id="AgregarIP" class="ui-button ui-widget ui-corner-all" style="margin-left:30px";"margin-bottom:20px";"margin-top:20px", onclick="AddIP()">Agregar IP</button><select id="Direccion_IP"></select>
+</div>
+
+<div id="switches_wired" class="grupo_btn">
+<button type="Button" id="Ventana" class="ui-button ui-widget ui-corner-all" >Ventana </button> 
+<button class="edit"><i class="fa fa-pencil"></i></button>
+</div>
+<div id="switches_wired" class="grupo_btn">
+<button type="Button" id="Barra" class="ui-button ui-widget ui-corner-all" >Barra </button>
+<button class="edit"><i class="fa fa-pencil"></i></button>
+</div>
+<div id="switches_wired" class="grupo_btn">
+<button type="Button" id="Mesada" class="ui-button ui-widget ui-corner-all" >Mesada </button>
+<button class="edit"><i class="fa fa-pencil"></i></button>
+
+<div id="switches_wired" class="grupo_btn">
+<button type="Button" id="Habitacion_Ventana" class="ui-button ui-widget ui-corner-all" >Habitacion Ventana </button>
+<button class="edit"><i class="fa fa-pencil"></i></button>
+</div>
+<div id="switches_wired" class="grupo_btn">
+<button type="Button" id="Habitacion" class="ui-button ui-widget ui-corner-all" >Habitacion </button>
+<button class="edit"><i class="fa fa-pencil"></i></button>
+</div>
+<div id="switches_wired" class="grupo_btn">
+<button type="Button" id="Riego1" class="ui-button ui-widget ui-corner-all" >Riego1 </button>
+<button class="edit"><i class="fa fa-pencil"></i></button>
+</div>
+<div id="switches_wired" class="grupo_btn">
+<button type="Button" id="Riego2" class="ui-button ui-widget ui-corner-all" >Riego2 </button>
+<button class="edit"><i class="fa fa-pencil"></i></button>
+</div>
+<div id="switches_wired" class="grupo_btn">
+<button type="Button" id="LuzExterior" class="ui-button ui-widget ui-corner-all" >Luz Exterior </button>
+<button class="edit"><i class="fa fa-pencil"></i></button>
+</div>
+<div id="switches_wired" class="grupo_btn">
+<button type="Button" id="Bomba" class="ui-button ui-widget ui-corner-all" >Bomba </button>
+<button class="edit"><i class="fa fa-pencil"></i></button>
+</div>
+</body>
+</html>
+

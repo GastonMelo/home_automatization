@@ -1,0 +1,17 @@
+#Mins  Hours  Days   Months  Day of the week
+#00     07     *      5,6,7,8 *       php /home/gaston/CronTab/LucesCocina.php
+#00     11     *      5,6,7,8 *       php /home/gaston/CrontTab/LucesCocinaOff.php
+#00     18     *      5,6,7,8 *       php /home/gaston/CronTab/LucesInviernoTarde.php
+#00     20     *      1,2,3,4,9,10,11,12 *  php /home/gaston/CronTab/LucesVeranoTarde.php
+#33     09     *      5,6,7,8 *        php /home/gaston/CronTab/Riego.php
+#00     10     *      5,6,7,8 *        php /home/gaston/CronTab/RiegoOff.php
+#33     09     *      1,2,3,4,9,10,11,12 *   php /home/gaston/CronTab/Riego.php
+#00     10     *      1,2,3,4,9,10,11,12 *   php /home/gaston/CronTab/RiegoOff.php
+#33     16     *      1,2,3,4,9,10,11,12 *   php /home/gaston/CronTab/Riego.php
+#00     17     *      1,2,3,4,9,10,11,12 *   php /home/gaston/CronTab/RiegoOff.php
+49      14     *       *      *   root    /usr/bin/php /home/gaston/CronTab/LucesCocina.php
+02      *      *       *      *   root    /usr/bin/php /home/gaston/CrontTab/LucesCocinaOff.php
+
+
+
+

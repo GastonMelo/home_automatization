@@ -1,0 +1,24 @@
+#!/bin/bash
+### BEGIN INIT INFO
+# Provides:          blabla
+# Required-Start:    $syslog
+# Required-Stop:     $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: blabla
+# Write: GastonMel√o   gastonmelo@gmail.com
+# Description:
+#
+### END INIT INFO
+#start(){
+gpio -g write 4 0;gpio -g mode 4 out;
+gpio -g write 17 0;gpio -g mode 17 out;
+gpio -g write 27 0;gpio -g mode 27 out;
+gpio -g write 22 0;gpio -g mode 22 out;
+gpio -g write 23 0;gpio -g mode 23 out;
+gpio -g write 24 0;gpio -g mode 24 out;
+gpio -g write 25 0;gpio -g mode 25 out;
+gpio -g write 9 0;gpio -g mode 9 out;
+gpio -g write 8 0;gpio -g mode 8 out;
+gpio -g write 7 0;gpio -g mode 7 out;
+#}

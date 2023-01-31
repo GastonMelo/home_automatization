@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html>
+<head>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<style>
+.grupo_ip Button {
+    border: 1px solid gray;
+    display: inline-block;
+}
+
+.grupo_btn Button {
+    border: 1px solid gray;
+    margin-top: 10px;
+    margin-left: 30px;
+    margin-right: 5px; 
+    margin-bottom: 10px;
+    display: block;
+    /*float: left;*/
+}
+
+.grupo_btn Button:not(:last-child) {
+    border-bottom: none; /* Prevent double borders */
+}
+
+/* Add a background color on hover */
+.grupo_btn  button:hover {
+    background-color: #51C5F5;
+}
+
+input[type=text], select {
+    width: 30%;
+    padding: 12px 20px;
+    margin: 10px 30px;
+    display: inline-block;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+.center{
+	margin: 0 auto;
+	text-align: center;
+}
+</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Control Autom&aacute;tico</title>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+</head>
+<body>
+<script type="text/javascript">
+var bgcolor;
+    $(document).ready(function(){
+	check_status_btn_wifi();
+	$.getJSON('enable.json',function(data){
+	//console.log(data);
+	$.each(data, function(key,val){
+	if(val.enable === "true"){
+	//console.log(val.pin);
+	$.ajax({
+                method: 'POST',
+                url: 'btn_status.php',
+                data: {'pin':val.pin},
+                success: function(output)
+		 {
+			if(output==1)
+				{
+				// console.log(output);
+				$("#" + val.id).css('background-color',"lightblue");
+			}
+			else{
+				$("#" + val.id).css('background-color',"none");
+			}
+		}
+        });
+	};
+	});
+	});
+	$('input[type=radio][name=conexion]').change(function(){
+	if(this.value == 'set_wired'){
+	$(switches_wired).show();
+	$(wifi_address).hide();
+	$(switches_wireless).hide();
+	}
+	else if(this.value == 'set_wireless'){
+	$(switches_wired).hide();
+	$(wifi_address).show();
+	$(switches_wireless).show();
+	}
+	else if(this.value == 'set_edit'){
+	$(wifi_address).hide();
+	$(switches_wireless).hide();
+	$(switches_wired).hide();
+	ReadJSON();
+	}
+	});
+	//---------------wire_buttons from json-----------------//
+	$.getJSON('enable.json', function(data) {
+	$.each(data, function(key,val){
+	if((val.nombre!="none")&&(val.enable!="none")){
+	var btn = $('<button>' + val.nombre + '</button>').attr('id', val.id).addClass("ui-button ui-widget ui-corner-all wired_btn");
+	(btn).appendTo(switches_wired);
+	}
+	});
+	});
+	//------------wireless buttons from jason---------------//
+	$.getJSON('ip.json', function(data) {
+	$.each(data, function(key,val){
+	//console.log(val.nombre);
+	if((val.nombre!="dummy")&&(val.direccion_ip!="dummy")){
+	var btn = $('<button>' + val.nombre + '</button>').attr('id', val.id).addClass("ui-button ui-widget ui-corner-all wifi_btn").attr("value",val.direccion_ip);
+	(btn).appendTo(switches_wireless);
+	$('#Direccion_IP').append( '<option>'+val.direccion_ip+'</option>' );
+	//console.log(val.direccion_ip);
+	}
+	});
+	});
+	//-----------------------------------------------------//
+	//----------------check wifi_btn-----------------------//
+        $(document).on('click', '.wifi_btn', function(){
+        var btn_id = $(this).attr('id');
+	var http = 'http://' + $(this).val();
+	//console.log(http);
+		$.ajax({
+		type: 'POST',
+                url: 'stat_wireless.php',
+		data: {'direccion_ip':http},
+                success: function(output)
+                 {
+                 console.log(output);
+		
+		if(output === "on"){
+			console.log("off");
+			$.get(http,'/off');
+			$('#' + btn_id).css('background-color',"#FFFFFF");
+		} 
+		else{
+			console.log("on");
+			$.get(http,'/on');
+			$('#' + btn_id).css('background-color',"lightblue");
+		}
+		
+		}
+		});
+	});
+
+	$('select').on('change',function(){
+		console.log(this.value);
+		var delete_ip=this.value;
+		confirm("¿desea borrar esta IP?");
+		if(confirm){
+			console.log(delete_ip);
+		}
+	});
+	//-----------------------check wire_btn----------------------------//
+	$(document).on('click', '.wired_btn', function(){
+	var btn_id = $(this).attr('id');
+	console.log(btn_id);
+	$.ajax({
+                url: btn_id + '.php',
+                data:{'status_php':status},
+                success: function(output) {
+                $('#' + btn_id).css('background-color',output);
+		//console.log($('#' + btn_id).css('background-color',output));
+                }
+        });
+	});
+	//-----------------------------------------------------------------//        
+});
+</script>
+<script>
+function check_status_btn_wifi(){
+	$.getJSON('ip.json', function(data) {
+        $.each(data, function(key,val){
+	if((val.nombre!="dummy")&&(val.direccion_ip!="dummy")){ 
+		var http = 'http://' + val.direccion_ip;
+		//console.log(http);
+		$.ajax({
+                type: "POST",
+                url: 'stat_wireless.php',
+		data: {'direccion_ip':http},
+                success: function(output)
+                 	{
+				//console.log(output);
+				if(output === 'on'){
+				$('#'+val.nombre).css('background-color',"lightblue");
+				}
+				else{
+				$('#'+val.nombre).css('background-color',"#FFFFFF");
+				}
+			}
+		});
+	}
+	});
+
+});
+}
+
+function AddIP(){
+	var var1 = prompt("Nombre dispositivo", "led_cocina");
+	var var2 = prompt("Direccion ip dispositivo", "192.168.0.x");
+	console.log(var1,var2);
+	
+	if((var1 != null)&&(var2 != null)){
+	$.ajax({
+		method: 'POST',
+                url: 'ip.php',
+                data: {"nombre":var1, "direccion":var2},
+                success: function(output) {console.log(output);}
+        });
+		}	
+	}
+//-------------------------------function ReadJSON-----------------------------------//
+function ReadJSON(){
+$.getJSON('enable.json', function(data) {
+        $.each(data, function(key,val){
+	console.log(data);
+	if((val.nombre!="none")&&(val.enable!="none")){
+	
+	}
+	});
+	});
+}
+//----------------------------------------------------------------------------------//	
+</script>
+
+<h1>Control Autom&aacute;tico</h1>
+
+<div id="radio_btn" class="center">
+<label for="wired">Wire </label><input type="radio" name="conexion" id="wired" value="set_wired" checked="checked" ><label for="wireless">Wireless</label><input type="radio" name="conexion" id="wireless" value="set_wireless">
+<label for="edit">Edit </label><input type="radio" name="conexion" id="edit" value="set_edit" checked="checked" >
+</div>
+
+<div id= wifi_address class="grupo_ip" style="display:none";>
+<button type="Button" id="AgregarIP" class="ui-button ui-widget ui-corner-all" style="margin-left:30px";"margin-bottom:20px";"margin-top:20px", onclick="AddIP()">Agregar IP</button><select id="Direccion_IP"></select>
+</div>
+
+<div id="switches_wireless" class="grupo_btn" style="display:none";>
+
+</div>
+
+<div id="switches_wired" class="grupo_btn">
+
+</div>
+
+</div>
+</body>
+</html>
+
